@@ -70,7 +70,8 @@ defmodule StripJs do
   Returns a copy of the given Floki HTML tree with all JS removed.
   """
   @spec strip_js_from_tree(Floki.html_tree) :: Floki.html_tree
-  def strip_js_from_tree(string) when is_binary(string), do: string
+  def strip_js_from_tree(tree)
+
   def strip_js_from_tree({tag, attrs, children}) do
     case String.downcase(tag) do
       "script" ->
@@ -79,6 +80,8 @@ defmodule StripJs do
         {tag, clean_attrs(attrs), Enum.map(children, &strip_js_from_tree/1)}
     end
   end
+
+  def strip_js_from_tree(string) when is_binary(string), do: string
 
 
   ## Removes attributes that carry JS; namely `href="javascript:..."` and
