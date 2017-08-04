@@ -39,7 +39,7 @@ defmodule StripJs do
       iex> StripJs.strip_js_with_status(html)
       {"<button data-onclick=\"alert('pwnt')\">Hi!</button>", true}
 
-  StripJs relies on the [https://github.com/philss/floki](Floki)
+  StripJs relies on the [Floki](https://github.com/philss/floki)
   HTML parser library.  StripJs provides a `strip_js_from_tree/1`
   function to strip JS from Floki HTML parse trees.
   """
