@@ -46,6 +46,9 @@ defmodule StripJs do
 
   @doc ~S"""
   Returns a copy of the given HTML string with all JS removed.
+
+  Even if the input HTML contained no JS, it may not match the output
+  byte-for-byte.
   """
   @spec strip_js(String.t) :: String.t
   def strip_js(html) when is_binary(html) do
@@ -57,6 +60,9 @@ defmodule StripJs do
   Returns a tuple containing a copy of the given HTML string with
   all JS removed, as well as a boolean that is `true` when there was
   JS present in the original HTML and `false` otherwise.
+
+  Even if the input HTML contained no JS, it may not match the output
+  byte-for-byte.
   """
   @spec strip_js_with_status(String.t) :: {String.t, boolean}
   def strip_js_with_status(html) when is_binary(html) do
