@@ -4,10 +4,10 @@ defmodule StripJs.Mixfile do
   def project do
     [
       app: :strip_js,
-      version: "0.1.0",
-      description: "Strip JS from HTML strings",
+      version: "0.5.0",
+      description: "Strip JS from HTML strings or parse trees",
       package: package(),
-      elixir: "~> 1.3",
+      elixir: "~> 1.2",
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       deps: deps(),
@@ -34,3 +34,4 @@ defmodule StripJs.Mixfile do
     ]
   end
 end
+
