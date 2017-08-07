@@ -21,7 +21,7 @@ and event handlers like `onclick` as follows:
 Add `strip_js` to your application's dependencies in `mix.exs`:
 
     def deps do
-      [{:strip_js, "~> 0.1.0"}]
+      [{:strip_js, "~> 0.5.0"}]
     end
 
 
