@@ -42,6 +42,18 @@ defmodule StripJs do
   StripJs relies on the [Floki](https://github.com/philss/floki)
   HTML parser library.  StripJs provides a `strip_js_from_tree/1`
   function to strip JS from Floki HTML parse trees.
+
+
+  ## Similar packages
+
+  [phoenix_html_sanitizer](https://github.com/elixirstatus/phoenix_html_sanitizer),
+  based on [html_sanitize_ex](https://github.com/rrrene/html_sanitize_ex),
+  provides similar functionality with its `:full_html` mode.
+  However, in addition to using the Phoenix.HTML.Safe protocol (returning
+  tuples like `{:safe, string}`), phoenix_html_sanitizer maintains the
+  contents of `script` tags, effectively pasting deactivated JS into the DOM.
+  StripJs improves on this behavior by removing the contents of `script` tags
+  entirely.
   """
 
   @doc ~S"""
