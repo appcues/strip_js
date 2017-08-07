@@ -1,5 +1,7 @@
 # StripJs
 
+[Documentation](https://hexdocs.pm/strip_js/StripJs.html)
+
 StripJs is an Elixir module for stripping executable JavaScript from
 blocks of HTML.  It removes `<script>` tags, `javascript:...` links,
 and event handlers like `onclick` as follows:
