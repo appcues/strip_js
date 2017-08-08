@@ -50,5 +50,5 @@ function to strip JS from Floki HTML parse trees.
 
 Copyright 2017, Appcues, Inc.
 
-StripJS is released under the [MIT License](https://opensource.org/licenses/MIT).
+StripJs is released under the [MIT License](https://opensource.org/licenses/MIT).
 
