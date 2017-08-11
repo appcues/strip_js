@@ -64,21 +64,16 @@ defmodule StripJsTest do
       assert(" asdf   omg " == StripJs.strip_js(" asdf <script>alert('LOL');</script>  omg "))
     end
 
-    it "does not HTML-encode things" do
-      assert("<" == StripJs.strip_js("<"))
+    it "HTML-encodes output" do
+      assert("&lt;" == StripJs.strip_js("<"))
+      assert("&lt;" == StripJs.strip_js("&lt;"))
+      assert("<tt>&lt;</tt>" == StripJs.strip_js("<tt><</tt>"))
+      assert("<tt>&lt;</tt>" == StripJs.strip_js("<tt>&lt;</tt>"))
+      assert("<tt attr=\"&lt;\">&lt;</tt>" == StripJs.strip_js("<tt attr='<'><</tt>"))
+      assert("<tt attr=\"&lt;\">&lt;</tt>" == StripJs.strip_js("<tt attr='&lt;'>&lt;</tt>"))
+      assert("&lt;script&gt; alert('pwnt'); &lt;/script&gt;" == StripJs.strip_js("&lt;script&gt; alert('pwnt'); &lt;/script&gt;"))
     end
   end
 
-  context "strip_js_with_status" do
-    it "returns true if JS was stripped out" do
-      assert({stripped_html, true} = StripJs.strip_js_with_status(@html_with_js))
-      assert(Floki.parse(stripped_html) == Floki.parse(@html_without_js))
-    end
-
-    it "returns false if no JS was stripped out" do
-      assert({stripped_html, false} = StripJs.strip_js_with_status(@html_without_js))
-      assert(Floki.parse(stripped_html) == Floki.parse(@html_without_js))
-    end
-  end
 end
 

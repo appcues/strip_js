@@ -31,6 +31,7 @@ defmodule StripJs.Mixfile do
       {:floki, "~> 0.17.2"},
       {:ex_spec, "~> 2.0", only: :test},
       {:ex_doc, ">= 0.0.0", only: :dev},
+      {:dialyxir, ">= 0.0.0", only: :dev},
     ]
   end
 end
