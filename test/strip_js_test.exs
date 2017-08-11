@@ -48,6 +48,25 @@ defmodule StripJsTest do
       stripped_html = Floki.parse(StripJs.strip_js(@html_without_js))
       assert(stripped_html == Floki.parse(@html_without_js))
     end
+
+    it "handles plain text" do
+      assert("asdf" == StripJs.strip_js("asdf"))
+      assert(" asdf   omg " == StripJs.strip_js(" asdf   omg "))
+      assert(" asdf   omg " == StripJs.strip_js(" asdf <script>alert('LOL');</script>  omg "))
+    end
+
+    it "handles mixed text and HTML" do
+      assert("<tt>1</tt>lol" == StripJs.strip_js("<tt>1</tt>lol"))
+      assert("asdf<tt>1</tt>lol" == StripJs.strip_js("asdf<tt>1</tt>lol"))
+      assert("asdf <tt> 1</tt> lol" == StripJs.strip_js("asdf <tt> 1</tt> lol"))
+      assert("asdf <tt> 1</tt> lol" == StripJs.strip_js("asdf <tt> 1<script src='bad.js'></script></tt> lol"))
+      assert("asdf <tt data-onclick=\"alert('hah');\"> 1</tt> lol" == StripJs.strip_js("asdf <tt onclick=\"alert('hah');\"> 1<script src='bad.js'></script></tt> lol"))
+      assert(" asdf   omg " == StripJs.strip_js(" asdf <script>alert('LOL');</script>  omg "))
+    end
+
+    it "does not HTML-encode things" do
+      assert("<" == StripJs.strip_js("<"))
+    end
   end
 
   context "strip_js_with_status" do

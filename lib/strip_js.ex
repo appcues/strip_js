@@ -19,7 +19,7 @@ defmodule StripJs do
   Add `strip_js` to your application's dependencies in `mix.exs`:
 
       def deps do
-        [{:strip_js, "~> 0.5.0"}]
+        [{:strip_js, "~> 0.6.0"}]
       end
 
 
@@ -64,8 +64,11 @@ defmodule StripJs do
   """
   @spec strip_js(String.t) :: String.t
   def strip_js(html) when is_binary(html) do
-    html |> Floki.parse |> strip_js_from_tree |> Floki.raw_html
+    html |> Floki.parse |> strip_js_from_tree |> to_html
   end
+
+  defp to_html(html) when is_binary(html), do: html
+  defp to_html(tree), do: tree |> Floki.raw_html
 
 
   @doc ~S"""
@@ -80,7 +83,7 @@ defmodule StripJs do
   def strip_js_with_status(html) when is_binary(html) do
     tree = html |> Floki.parse
     stripped_tree = tree |> strip_js_from_tree
-    {Floki.raw_html(stripped_tree), (tree != stripped_tree)}
+    {to_html(stripped_tree), (tree != stripped_tree)}
   end
 
 
@@ -89,6 +92,10 @@ defmodule StripJs do
   """
   @spec strip_js_from_tree(Floki.html_tree) :: Floki.html_tree
   def strip_js_from_tree(tree)
+
+  def strip_js_from_tree(trees) when is_list(trees) do
+    Enum.map(trees, &strip_js_from_tree/1)
+  end
 
   def strip_js_from_tree({tag, attrs, children}) do
     case String.downcase(tag) do
