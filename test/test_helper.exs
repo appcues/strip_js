@@ -9,12 +9,12 @@ defmodule TestCases do
       ~s[<a href="whatever">Click here</a>],
     },
     {
-      ~s[<body onload="alert('XSS')><p>Hello</p></body>],
+      ~s[<body onload="alert('XSS')"><p>Hello</p></body>],
       ~s[<body><p>Hello</p></body>],
     },
     {
       ~s[<img src="javascript:alert('XSS');">],
-      ~s[<img src="#">],
+      ~s[<img src="#"/>],
     },
     {
       ~s[<script>alert('XSS');</script>],
@@ -22,26 +22,23 @@ defmodule TestCases do
     },
     {
       ~s[<body background="javascript:alert('XSS');"><p>Hello</p></body>],
-      ~s[<body><p>Hello</p></body>],
+      ~s[<body background="#"><p>Hello</p></body>],
     },
     {
       ~s[<style>body { background-image: expression('alert("XSS")'); }</style>],
-      ~s[<style>body { background-image: removed-by-strip-js('alert("XSS")'); }</style>],
+      ~s[<style>body { background-image: removed_by_strip_js('alert("XSS")'); }</style>],
     },
     {
       ~s[<style>body { background-image: url('javascript:alert("XSS")'); }</style>],
-      ~s[<style>body { background-image: url('removed-by-strip-js:alert("XSS")'); }</style>],
+      ~s[<style>body { background-image: url('removed_by_strip_js:alert("XSS")'); }</style>],
     },
-
     {
       ~s[<style><script>alert('XSS')</script></style>],
       ~s[<style><script>alert('XSS')</script></style>],
     },
-
-
     {
-      ~s[<style> h1 > a { color: red; }],
-      ~s[],
+      ~s[<style> h1 > a { color: red; }</style>],
+      ~s[<style> h1 > a { color: red; }</style>],
     },
 
     {
@@ -56,7 +53,7 @@ defmodule TestCases do
         unquote(@test_cases) |> Enum.with_index |> Enum.each(fn ({{input, out}, i}) ->
           real_output_tree = input |> StripJs.clean_html |> Floki.parse
           expected_output_tree = out |> Floki.parse
-          assert(real_output_tree == expected_output_tree) #, "test case #{i}: #{inspect(input)}")
+          assert(expected_output_tree == real_output_tree)
         end)
       end
     end

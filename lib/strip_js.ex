@@ -1,25 +1,25 @@
 defmodule StripJs do
   @moduledoc ~s"""
-  (StripJs)[https://github.com/appcues/strip_js]
+  [StripJs](https://github.com/appcues/strip_js)
   is an Elixir module for stripping executable JavaScript from
   blocks of HTML and CSS.
 
   It handles:
 
   * `<script>...</script>` and `<script src="..."></script>` tags
-  * `href="javascript:..."` attributes
-  * `src="javascript:..."` attributes
   * Event handler attributes such as `onclick="..."`
+  * `javascript:...` URLs in HTML and CSS
   * CSS `expression(...)` directives
-  * CSS `javascript:...` URLs
-
-  StripJs HTML output is always HTML-escaped to prevent HTML entity
-  attacks (like `&lt;script&gt;`).
+  * HTML entity attacks (like `&lt;script&gt;`)
 
 
   ## Installation
 
-  Add `strip_js` to your application's dependencies in `mix.exs`:
+  Add `strip_js` to your application's `mix.exs`:
+
+      def application do
+        [applications: [:strip_js]]
+      end
 
       def deps do
         [{:strip_js, "~> #{StripJs.Mixfile.project[:version]}"}]
@@ -30,7 +30,7 @@ defmodule StripJs do
 
   `clean_html/1` removes all JS vectors from an HTML string:
 
-      iex> html = ~s[<button onclick=\"alert('pwnt')\">Hi!</button>]
+      iex> html = ~s[<button onclick="alert('pwnt')">Hi!</button>]
       iex> StripJs.clean_html(html)
       ~s[<button>Hi!</button>]
 
@@ -55,6 +55,17 @@ defmodule StripJs do
   contents of `script` tags, effectively pasting deactivated JS into the DOM.
   StripJs improves on this behavior by removing the contents of `script` tags
   entirely.
+
+
+  ## Authorship and License
+
+  Copyright 2017, Appcues, Inc.
+
+  Project homepage:
+  [StripJs](https://github.com/appcues/strip_js)
+
+  StripJs is released under the
+  [MIT License](https://opensource.org/licenses/MIT).
   """
 
   @type opts :: Keyword.t  # reserved for future use
@@ -106,9 +117,10 @@ defmodule StripJs do
   @doc ~S"""
   Removes JS vectors from the given
   [Floki](https://github.com/philss/floki)-style HTML tree
-  (`t:html_tree`).
+  (`t:html_tree/0`).
 
-  All tag bodies and attribute values will be HTML-escaped.
+  All attribute values and tag bodies except embedded stylesheets
+  will be HTML-escaped.
   """
   @spec clean_html_tree(html_tree, opts) :: html_tree
   def clean_html_tree(trees, opts \\ [])
@@ -122,11 +134,11 @@ defmodule StripJs do
       "script" ->
         ""  # remove scripts entirely
       "style" ->
-        clean_css = children |> to_html |> clean_css  # don't HTML-escape!
-        {tag, clean_attrs(attrs), clean_css}
+        cleaned_css = children |> to_html |> clean_css  # don't HTML-escape!
+        {tag, clean_attrs(attrs), [cleaned_css]}
       _ ->
-        clean_children = Enum.map(children, &(clean_html_tree(&1)))
-        {tag, clean_attrs(attrs), clean_children}
+        cleaned_children = Enum.map(children, &(clean_html_tree(&1)))
+        {tag, clean_attrs(attrs), cleaned_children}
     end
   end
 
@@ -145,14 +157,23 @@ defmodule StripJs do
 
   @doc ~S"""
   Removes JS vectors from the given CSS string; i.e., the contents of a
-  stylesheet or `<style>` tag.  Does not HTML-escape its output.
+  stylesheet or `<style>` tag.
+
+  Does not HTML-escape its output.  Care is taken to maintain valid CSS
+  syntax.
+
+  Example:
+
+      iex> css = ~s[tt {background-color: expression('alert("XSS")');}]
+      iex> StripJs.clean_css(css)
+      ~s[tt {background-color: removed_by_strip_js('alert("XSS")');}]
 
   Warning: this step is performed using regexes, not a parser, so it is
   possible for innocent CSS containing either of the strings `javascript:`
   or `expression(` to be mangled.
   """
-  @spec clean_css(String.t) :: String.t
-  def clean_css(css) when is_binary(css) do
+  @spec clean_css(String.t, opts) :: String.t
+  def clean_css(css, _opts \\ []) when is_binary(css) do
     css
     |> String.replace(~r/javascript \s* :/xi, "removed_by_strip_js:")
     |> String.replace(~r/expression \s* \(/xi, "removed_by_strip_js(")

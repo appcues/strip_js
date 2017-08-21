@@ -3,49 +3,42 @@
 [Documentation](https://hexdocs.pm/strip_js/StripJs.html)
 
 StripJs is an Elixir module for stripping executable JavaScript from
-blocks of HTML.  It handles:
+blocks of HTML and CSS.
+
+It handles:
 
 * `<script>...</script>` and `<script src="..."></script>` tags
-* `href="javascript:..."` attributes
-* `src="javascript:..."` attributes
 * Event handler attributes such as `onclick="..."`
-* CSS `expression(...)` directives (in `<style>` tags)
-* CSS `javascript:...` URLs (in `<style>` tags)
-
-
-## Installation
-
-Add `strip_js` to your application's dependencies in `mix.exs`:
-
-    def deps do
-      [{:strip_js, "~> 0.8.0"}]
-    end
+* `javascript:...` URLs in HTML and CSS
+* CSS `expression(...)` directives
+* HTML entity attacks (like `&lt;script&gt;`)
 
 
 ## Usage
 
-`strip_js/1` returns a copy of its input, with all JS removed.
+`clean_html/1` removes all JS vectors from an HTML string:
 
-    iex> html = "<button onclick=\"alert('pwnt')\">Hi!</button>"
-    iex> StripJs.strip_js(html)
-    "<button data-onclick=\"alert('pwnt')\">Hi!</button>"
+    iex> html = ~s[<button onclick="alert('pwnt')">Hi!</button>]
+    iex> StripJs.clean_html(html)
+    ~s[<button>Hi!</button>]
 
-`strip_js_with_status/1` performs the same function as `strip_js/1`,
-also returning a boolean indicating whether any JS was removed from
-the input.
+`clean_css/1` removes all JS vectors from a CSS string:
 
-    iex> html = "<button onclick=\"alert('pwnt')\">Hi!</button>"
-    iex> StripJs.strip_js_with_status(html)
-    {"<button data-onclick=\"alert('pwnt')\">Hi!</button>", true}
+    iex> css = ~s[body {background-image: url('javascript:alert("XSS")');}]
+    iex> StripJs.clean_css(css)
+    ~s[body {background-image: url('removed_by_strip_js:alert("XSS")');}]
 
-StripJs relies on the [Floki](https://github.com/philss/floki)
-HTML parser library.  StripJs provides a `strip_js_from_tree/1`
-function to strip JS from Floki HTML parse trees.
+
+## [Documentation](https://hexdocs.pm/strip_js/StripJs.html)
+
+[Full docs](https://hexdocs.pm/strip_js/StripJs.html) are available at
+Hexdocs.pm.
 
 
 ## Authorship and License
 
 Copyright 2017, Appcues, Inc.
 
-StripJs is released under the [MIT License](https://opensource.org/licenses/MIT).
+StripJs is released under the
+[MIT License](https://opensource.org/licenses/MIT).
 

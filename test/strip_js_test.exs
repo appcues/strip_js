@@ -77,9 +77,5 @@ defmodule StripJsTest do
     end
   end
 
-  context "test cases" do
-    
-  end
-
 end
 

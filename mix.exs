@@ -4,8 +4,8 @@ defmodule StripJs.Mixfile do
   def project do
     [
       app: :strip_js,
-      version: "0.7.0",
-      description: "Strip JS from HTML strings or parse trees",
+      version: "0.9.0",
+      description: "Strip JavaScript from HTML and CSS",
       package: package(),
       elixir: "~> 1.2",
       build_embedded: Mix.env == :prod,
@@ -23,7 +23,9 @@ defmodule StripJs.Mixfile do
   end
 
   def application do
-    [extra_applications: [:logger]]
+    [
+      applications: [:logger, :floki],
+    ]
   end
 
   defp deps do
