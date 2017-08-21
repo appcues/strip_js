@@ -1,20 +1,20 @@
 defmodule StripJs do
-  @moduledoc ~S"""
-  StripJs is an Elixir module for stripping executable JavaScript from
-  blocks of HTML.  It removes or deactivates `<script>` tags,
-  `javascript:...` links, and event handlers like `onclick` as follows:
+  @moduledoc ~s"""
+  (StripJs)[https://github.com/appcues/strip_js]
+  is an Elixir module for stripping executable JavaScript from
+  blocks of HTML and CSS.
+
+  It handles:
 
   * `<script>...</script>` and `<script src="..."></script>` tags
-    are removed entirely.
+  * `href="javascript:..."` attributes
+  * `src="javascript:..."` attributes
+  * Event handler attributes such as `onclick="..."`
+  * CSS `expression(...)` directives
+  * CSS `javascript:...` URLs
 
-  * `<a href="javascript:...">` is converted to
-    `<a href="#" data-href-javascript="...">`.
-
-  * Event handler attributes such as `onclick="..."` are converted to
-    e.g., `data-onclick="..."`.
-
-  StripJs output is always HTML-escaped to prevent HTML entity attacks
-  (like `&lt;script&gt;`).
+  StripJs HTML output is always HTML-escaped to prevent HTML entity
+  attacks (like `&lt;script&gt;`).
 
 
   ## Installation
@@ -22,21 +22,27 @@ defmodule StripJs do
   Add `strip_js` to your application's dependencies in `mix.exs`:
 
       def deps do
-        [{:strip_js, "~> 0.7.0"}]
+        [{:strip_js, "~> #{StripJs.Mixfile.project[:version]}"}]
       end
 
 
   ## Usage
 
-  `strip_js/1` returns a copy of its input, with all JS removed.
+  `clean_html/1` removes all JS vectors from an HTML string:
 
-      iex> html = "<button onclick=\"alert('pwnt')\">Hi!</button>"
-      iex> StripJs.strip_js(html)
-      "<button data-onclick=\"alert('pwnt')\">Hi!</button>"
+      iex> html = ~s[<button onclick=\"alert('pwnt')\">Hi!</button>]
+      iex> StripJs.clean_html(html)
+      ~s[<button>Hi!</button>]
+
+  `clean_css/1` removes all JS vectors from a CSS string:
+
+      iex> css = ~s[body {background-image: url('javascript:alert("XSS")');}]
+      iex> StripJs.clean_css(css)
+      ~s[body {background-image: url('removed_by_strip_js:alert("XSS")');}]
 
   StripJs relies on the [Floki](https://github.com/philss/floki)
-  HTML parser library.  StripJs provides a `strip_js_from_tree/1`
-  function to strip JS from Floki HTML parse trees.
+  HTML parser library.  StripJs provides a `clean_html_tree/1`
+  function to strip JS from Floki-style HTML parse trees.
 
 
   ## Similar packages
@@ -51,9 +57,20 @@ defmodule StripJs do
   entirely.
   """
 
+  @type opts :: Keyword.t  # reserved for future use
+
+  @type html_tag :: String.t
+
+  @type html_attr :: {String.t, String.t}
+
+  @type html_node :: String.t | {html_tag, [html_attr], [html_node]}
+
+  @type html_tree :: html_node | [html_node]
+
 
   @doc ~S"""
-  Returns a copy of the given HTML string with all JS removed.
+  Removes JS vectors from the given HTML string.
+
   All non-tag text and tag attribute values will be HTML-escaped.
 
   Even if the input HTML contained no JS, the output is not guaranteed
@@ -61,82 +78,108 @@ defmodule StripJs do
 
   Examples:
 
-      iex> StripJs.strip_js("<button onclick=\"alert('phear');\">Click here</button>")
-      "<button data-onclick=\"alert('phear');\">Click here</button>"
+      iex> StripJs.clean_html("<button onclick=\"alert('phear');\">Click here</button>")
+      "<button>Click here</button>"
 
-      iex> StripJs.strip_js("<script> console.log('oh heck'); </script>")
+      iex> StripJs.clean_html("<script> console.log('oh heck'); </script>")
       ""
 
-      iex> StripJs.strip_js("&lt;script&gt; console.log('oh heck'); &lt;/script&gt;")
+      iex> StripJs.clean_html("&lt;script&gt; console.log('oh heck'); &lt;/script&gt;")
       "&lt;script&gt; console.log('oh heck'); &lt;/script&gt;"  ## HTML entity attack didn't work
 
   """
-  @spec strip_js(String.t) :: String.t
-  def strip_js(html) when is_binary(html) do
+  @spec clean_html(String.t, opts) :: String.t
+  def clean_html(html, opts \\ []) when is_binary(html) do
     html
     |> Floki.parse
-    |> strip_js_from_tree
+    |> clean_html_tree(opts)
     |> to_html
   end
 
-  @spec to_html(Floki.html_tree) :: String.t
-  defp to_html(html) when is_binary(html), do: html
-  defp to_html(tree), do: tree |> Floki.raw_html
+  @doc false
+  def strip_js(html, opts \\ []) do
+    IO.warn("StripJs.strip_js is deprecated; use StripJs.clean_html instead")
+    clean_html(html, opts)
+  end
 
 
   @doc ~S"""
-  Returns a copy of the given Floki HTML tree with all JS removed.
+  Removes JS vectors from the given
+  [Floki](https://github.com/philss/floki)-style HTML tree
+  (`t:html_tree`).
+
   All tag bodies and attribute values will be HTML-escaped.
   """
-  @spec strip_js_from_tree(Floki.html_tree) :: Floki.html_tree
+  @spec clean_html_tree(html_tree, opts) :: html_tree
+  def clean_html_tree(trees, opts \\ [])
 
-  def strip_js_from_tree(trees) when is_list(trees) do
-    Enum.map(trees, &(strip_js_from_tree(&1)))
+  def clean_html_tree(trees, opts) when is_list(trees) do
+    Enum.map(trees, &(clean_html_tree(&1, opts)))
   end
 
-  def strip_js_from_tree({tag, attrs, children}) do
+  def clean_html_tree({tag, attrs, children}, _opts) do
     case String.downcase(tag) do
       "script" ->
         ""  # remove scripts entirely
+      "style" ->
+        clean_css = children |> to_html |> clean_css  # don't HTML-escape!
+        {tag, clean_attrs(attrs), clean_css}
       _ ->
-        stripped_children = Enum.map(children, &(strip_js_from_tree(&1)))
-        {tag, clean_attrs(attrs), stripped_children}
+        clean_children = Enum.map(children, &(clean_html_tree(&1)))
+        {tag, clean_attrs(attrs), clean_children}
     end
   end
 
-  def strip_js_from_tree(string) when is_binary(string) do
+  def clean_html_tree(string, _opts) when is_binary(string) do
     string |> html_escape
   end
 
 
-  ## Removes attributes that carry JS; namely `href="javascript:..."` and
-  ## `onevent="..."` handlers (onclick, onchange, etc).
+  @doc false
+  @spec strip_js_from_tree(html_tree, opts) :: html_tree
+  def strip_js_from_tree(tree, opts \\ []) do
+    IO.warn("StripJs.strip_js_from_tree is deprecated; use StripJs.clean_html_tree instead")
+    clean_html_tree(tree, opts)
+  end
+
+
+  @doc ~S"""
+  Removes JS vectors from the given CSS string; i.e., the contents of a
+  stylesheet or `<style>` tag.  Does not HTML-escape its output.
+
+  Warning: this step is performed using regexes, not a parser, so it is
+  possible for innocent CSS containing either of the strings `javascript:`
+  or `expression(` to be mangled.
+  """
+  @spec clean_css(String.t) :: String.t
+  def clean_css(css) when is_binary(css) do
+    css
+    |> String.replace(~r/javascript \s* :/xi, "removed_by_strip_js:")
+    |> String.replace(~r/expression \s* \(/xi, "removed_by_strip_js(")
+  end
+
+
+  ## Removes JS vectors from the given HTML attributes.
   @spec clean_attrs([{String.t, String.t}]) :: [{String.t, String.t}]
   defp clean_attrs(attrs) do
-    rev_attrs = Enum.reduce attrs, [], fn ({attr, value}, acc) ->
-      case String.downcase(attr) do
-        ## <a href="javascript:alert('foo')"> ... </a>  becomes
-        ## <a href="#" data-href-javascript="alert('foo')"> ... </a>
-        "href" ->
-          case String.downcase(value) do
-            "javascript:" <> _rest ->
-              rest = value |> String.slice(11..-1) |> html_escape
-              [{attr, "#"}, {"data-href-javascript", rest} | acc]
-            _ ->
-              [{attr, html_escape(value)} | acc]
-          end
+    attrs
+    |> Enum.reduce([], &clean_attr/2)
+    |> Enum.reverse
+  end
 
-        ## <tag onclick="alert('foo')"> ... </tag> becomes
-        ## <tag data-onclick="alert('foo')"> ... </tag>
-        "on" <> event ->
-          [{"data-on#{event}", html_escape(value)} | acc]
+  @attrs_with_urls ["href", "src", "background", "dynsrc", "lowsrc"]
 
-        _ ->
-          [{attr, html_escape(value)} | acc]
-      end
+  @spec clean_attr({String.t, String.t}, [{String.t, String.t}]) :: [{String.t, String.t}]
+  defp clean_attr({attr, value}, acc) do
+    attr = String.downcase(attr)
+    cond do
+      (attr in @attrs_with_urls) && String.match?(value, ~r/^ \s* javascript \s* :/xi) ->
+        [{attr, "#"} | acc]  # retain the attribute so we emit valid HTML
+      String.starts_with?(attr, "on") ->
+        acc  # remove on* handlers entirely
+      :else ->
+        [{attr, html_escape(value)} | acc]
     end
-
-    rev_attrs |> Enum.reverse
   end
 
 
@@ -149,5 +192,11 @@ defmodule StripJs do
     |> String.replace(">", "&gt;")
     |> String.replace("\"", "&quot;")
   end
+
+
+  ## Converts HTML tree to string.
+  @spec to_html(Floki.html_tree) :: String.t
+  defp to_html(tree) when is_binary(tree), do: tree
+  defp to_html(tree), do: tree |> Floki.raw_html
 end
 

@@ -3,17 +3,14 @@
 [Documentation](https://hexdocs.pm/strip_js/StripJs.html)
 
 StripJs is an Elixir module for stripping executable JavaScript from
-blocks of HTML.  It removes `<script>` tags, `javascript:...` links,
-and event handlers like `onclick` as follows:
+blocks of HTML.  It handles:
 
 * `<script>...</script>` and `<script src="..."></script>` tags
-  are removed entirely.
-
-* `<a href="javascript:...">` is converted to
-  `<a href="#" data-href-javascript="...">`.
-
-* Event handler attributes such as `onclick="..."` are converted to
-  e.g., `data-onclick="..."`.
+* `href="javascript:..."` attributes
+* `src="javascript:..."` attributes
+* Event handler attributes such as `onclick="..."`
+* CSS `expression(...)` directives (in `<style>` tags)
+* CSS `javascript:...` URLs (in `<style>` tags)
 
 
 ## Installation
@@ -21,7 +18,7 @@ and event handlers like `onclick` as follows:
 Add `strip_js` to your application's dependencies in `mix.exs`:
 
     def deps do
-      [{:strip_js, "~> 0.6.0"}]
+      [{:strip_js, "~> 0.8.0"}]
     end
 
 
