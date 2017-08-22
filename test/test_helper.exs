@@ -37,10 +37,17 @@ defmodule TestCases do
       ~s[<style><script>alert('XSS')</script></style>],
     },
     {
-      ~s[<style> h1 > a { color: red; }</style>],
-      ~s[<style> h1 > a { color: red; }</style>],
+      ~s[<style> h1 > a { color: red; } </style>],
+      ~s[<style> h1 > a { color: red; } </style>],
     },
-
+    {
+      ~s[<],
+      ~s[&lt;],
+    },
+    {
+      ~s[>],
+      ~s[&gt;],
+    },
     {
       ~s[],
       ~s[],

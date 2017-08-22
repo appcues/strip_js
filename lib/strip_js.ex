@@ -25,36 +25,25 @@ defmodule StripJs do
         [{:strip_js, "~> #{StripJs.Mixfile.project[:version]}"}]
       end
 
+  """ <> ~S"""
 
   ## Usage
 
   `clean_html/1` removes all JS vectors from an HTML string:
 
-      iex> html = ~s[<button onclick="alert('pwnt')">Hi!</button>]
+      iex> html = "<button onclick=\"alert('pwnt')\">Hi!</button>"
       iex> StripJs.clean_html(html)
-      ~s[<button>Hi!</button>]
+      "<button>Hi!</button>"
 
   `clean_css/1` removes all JS vectors from a CSS string:
 
-      iex> css = ~s[body {background-image: url('javascript:alert("XSS")');}]
+      iex> css = "body {background-image: url('javascript:alert()');}"
       iex> StripJs.clean_css(css)
-      ~s[body {background-image: url('removed_by_strip_js:alert("XSS")');}]
+      "body {background-image: url('removed_by_strip_js:alert()');}"
 
   StripJs relies on the [Floki](https://github.com/philss/floki)
   HTML parser library.  StripJs provides a `clean_html_tree/1`
   function to strip JS from Floki-style HTML parse trees.
-
-
-  ## Similar packages
-
-  [phoenix_html_sanitizer](https://github.com/elixirstatus/phoenix_html_sanitizer),
-  based on [html_sanitize_ex](https://github.com/rrrene/html_sanitize_ex),
-  provides similar functionality with its `:full_html` mode.
-  However, in addition to using the Phoenix.HTML.Safe protocol (returning
-  tuples like `{:safe, string}`), phoenix_html_sanitizer maintains the
-  contents of `script` tags, effectively pasting deactivated JS into the DOM.
-  StripJs improves on this behavior by removing the contents of `script` tags
-  entirely.
 
 
   ## Authorship and License
@@ -164,9 +153,9 @@ defmodule StripJs do
 
   Example:
 
-      iex> css = ~s[tt {background-color: expression('alert("XSS")');}]
+      iex> css = "tt { background-color: expression('alert()'); }"
       iex> StripJs.clean_css(css)
-      ~s[tt {background-color: removed_by_strip_js('alert("XSS")');}]
+      "tt { background-color: removed_by_strip_js('alert()'); }"
 
   Warning: this step is performed using regexes, not a parser, so it is
   possible for innocent CSS containing either of the strings `javascript:`
