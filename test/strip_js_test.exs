@@ -2,8 +2,6 @@ defmodule StripJsTest do
   use ExSpec, async: true
   doctest StripJs
 
-  use TestCases
-
   @html_with_js """
   <html>
   <head>
@@ -40,6 +38,15 @@ defmodule StripJsTest do
   </html>
   """
 
+  context "test cases" do
+    it "passes test cases" do
+      Enum.each TestCases.test_cases, fn ({input, out}) ->
+        real_output_tree = input |> StripJs.clean_html
+        expected_output_tree = out
+        assert(expected_output_tree == real_output_tree)
+      end
+    end
+  end
   context "strip_js" do
     it "strips js from html" do
       stripped_html = Floki.parse(StripJs.clean_html(@html_with_js))

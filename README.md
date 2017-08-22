@@ -1,7 +1,5 @@
 # StripJs
 
-[Documentation](https://hexdocs.pm/strip_js/StripJs.html)
-
 StripJs is an Elixir module for stripping executable JavaScript from
 blocks of HTML and CSS.
 
@@ -16,17 +14,17 @@ It handles:
 
 ## Usage
 
-`clean_html/1` removes all JS vectors from an HTML string:
+`clean_html/2` removes all JS vectors from an HTML string:
 
-    iex> html = ~s[<button onclick="alert('pwnt')">Hi!</button>]
+    iex> html = "<button onclick=\"alert('pwnt')\">Hi!</button>"
     iex> StripJs.clean_html(html)
-    ~s[<button>Hi!</button>]
+    "<button>Hi!</button>"
 
-`clean_css/1` removes all JS vectors from a CSS string:
+`clean_css/2` removes all JS vectors from a CSS string:
 
-    iex> css = ~s[body {background-image: url('javascript:alert("XSS")');}]
+    iex> css = "body { background-image: url('javascript:alert()'); }"
     iex> StripJs.clean_css(css)
-    ~s[body {background-image: url('removed_by_strip_js:alert("XSS")');}]
+    "body { background-image: url('removed_by_strip_js:alert()'); }"
 
 
 ## [Documentation](https://hexdocs.pm/strip_js/StripJs.html)

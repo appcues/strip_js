@@ -1,7 +1,6 @@
 defmodule StripJs do
   @moduledoc ~s"""
-  [StripJs](https://github.com/appcues/strip_js)
-  is an Elixir module for stripping executable JavaScript from
+  StripJs is an Elixir module for stripping executable JavaScript from
   blocks of HTML and CSS.
 
   It handles:
@@ -29,21 +28,35 @@ defmodule StripJs do
 
   ## Usage
 
-  `clean_html/1` removes all JS vectors from an HTML string:
+  `clean_html/2` removes all JS vectors from an HTML string:
 
       iex> html = "<button onclick=\"alert('pwnt')\">Hi!</button>"
       iex> StripJs.clean_html(html)
       "<button>Hi!</button>"
 
-  `clean_css/1` removes all JS vectors from a CSS string:
+  `clean_css/2` removes all JS vectors from a CSS string:
 
-      iex> css = "body {background-image: url('javascript:alert()');}"
+      iex> css = "body { background-image: url('javascript:alert()'); }"
       iex> StripJs.clean_css(css)
-      "body {background-image: url('removed_by_strip_js:alert()');}"
+      "body { background-image: url('removed_by_strip_js:alert()'); }"
 
   StripJs relies on the [Floki](https://github.com/philss/floki)
-  HTML parser library.  StripJs provides a `clean_html_tree/1`
-  function to strip JS from Floki-style HTML parse trees.
+  HTML parser library, which is built using
+  [Mochiweb](https://github.com/mochi/mochiweb).
+  StripJs provides a `clean_html_tree/1` function to strip JS from
+  `Floki.parse/1`- and `:mochiweb_html.parse/1`- style HTML parse trees.
+
+
+  ## Bugs and Limitations
+
+  The brokenness of invalid HTML may be amplified by `clean_html/2`.
+
+  In uncommon cases, innocent CSS which very closely resembles
+  JS-injection techniques may be mangled by `clean_css/2`.
+
+  StripJs may not block 100% of executable JavaScript, though it gets
+  quite close.  If you believe there are JS injection methods not
+  covered by this library, please submit an issue with a test case!
 
 
   ## Authorship and License
@@ -56,6 +69,7 @@ defmodule StripJs do
   StripJs is released under the
   [MIT License](https://opensource.org/licenses/MIT).
   """
+  require Logger
 
   @type opts :: Keyword.t  # reserved for future use
 
@@ -71,10 +85,11 @@ defmodule StripJs do
   @doc ~S"""
   Removes JS vectors from the given HTML string.
 
-  All non-tag text and tag attribute values will be HTML-escaped.
+  All non-tag text and tag attribute values will be HTML-escaped, except
+  for the contents of `<style>` tags, which are passed through `clean_css/2`.
 
-  Even if the input HTML contained no JS, the output is not guaranteed
-  to match byte-for-byte, but it will be equivalent HTML.
+  Even if the input HTML contained no JS, the output of `clean_html/2`
+  is not guaranteed to match its input byte-for-byte.
 
   Examples:
 
@@ -86,12 +101,11 @@ defmodule StripJs do
 
       iex> StripJs.clean_html("&lt;script&gt; console.log('oh heck'); &lt;/script&gt;")
       "&lt;script&gt; console.log('oh heck'); &lt;/script&gt;"  ## HTML entity attack didn't work
-
   """
   @spec clean_html(String.t, opts) :: String.t
   def clean_html(html, opts \\ []) when is_binary(html) do
     html
-    |> Floki.parse
+    |> parse_html(opts)
     |> clean_html_tree(opts)
     |> to_html
   end
@@ -105,7 +119,8 @@ defmodule StripJs do
 
   @doc ~S"""
   Removes JS vectors from the given
-  [Floki](https://github.com/philss/floki)-style HTML tree
+  [Floki](https://github.com/philss/floki)/
+  [Mochiweb](https://github.com/mochi/mochiweb)-style HTML tree
   (`t:html_tree/0`).
 
   All attribute values and tag bodies except embedded stylesheets
@@ -134,7 +149,6 @@ defmodule StripJs do
   def clean_html_tree(string, _opts) when is_binary(string) do
     string |> html_escape
   end
-
 
   @doc false
   @spec strip_js_from_tree(html_tree, opts) :: html_tree
@@ -200,12 +214,16 @@ defmodule StripJs do
     |> String.replace("&", "&amp;")
     |> String.replace("<", "&lt;")
     |> String.replace(">", "&gt;")
-    |> String.replace("\"", "&quot;")
   end
 
 
+  ## Parses the given HTML into an `t:html_tree/0` structure.
+  @spec parse_html(String.t, opts) :: html_tree
+  defp parse_html(html, _opts), do: Floki.parse(html)
+
+
   ## Converts HTML tree to string.
-  @spec to_html(Floki.html_tree) :: String.t
+  @spec to_html(html_tree) :: String.t
   defp to_html(tree) when is_binary(tree), do: tree
   defp to_html(tree), do: tree |> Floki.raw_html
 end

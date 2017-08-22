@@ -54,17 +54,7 @@ defmodule TestCases do
     },
   ]
 
-  defmacro __using__(_) do
-    quote do
-      it "matches test cases" do
-        unquote(@test_cases) |> Enum.with_index |> Enum.each(fn ({{input, out}, i}) ->
-          real_output_tree = input |> StripJs.clean_html |> Floki.parse
-          expected_output_tree = out |> Floki.parse
-          assert(expected_output_tree == real_output_tree)
-        end)
-      end
-    end
-  end
+  def test_cases, do: @test_cases
 end
 
 ExUnit.start()
