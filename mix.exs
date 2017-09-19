@@ -11,6 +11,9 @@ defmodule StripJs.Mixfile do
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       deps: deps(),
+      aliases: [
+        docs: "docs --source-url https://github.com/appcues/strip_js",
+      ],
    ]
   end
 
