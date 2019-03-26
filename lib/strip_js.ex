@@ -133,6 +133,10 @@ defmodule StripJs do
     Enum.map(trees, &(clean_html_tree(&1, opts)))
   end
 
+  def clean_html_tree({:comment, comment}, _opts) do
+    {:comment, comment}
+  end
+
   def clean_html_tree({tag, attrs, children}, _opts) do
     case String.downcase(tag) do
       "script" ->

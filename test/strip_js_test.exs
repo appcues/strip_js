@@ -10,6 +10,7 @@ defmodule StripJsTest do
     <script>wowCool();</script>
   </head>
   <body>
+    <!--omg comment-->
     <a href="http://example.com" onclick="alert('wow')">Click me</a>
     <div>
       <a href="javascript:alert('omg')">Click me too</a>
@@ -29,6 +30,7 @@ defmodule StripJsTest do
     <title>garbage</title>
   </head>
   <body>
+    <!--omg comment-->
     <a href="http://example.com">Click me</a>
     <div>
       <a href="#">Click me too</a>
