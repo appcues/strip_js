@@ -206,7 +206,7 @@ defmodule StripJs do
       String.starts_with?(attr, "on") ->
         acc  # remove on* handlers entirely
       :else ->
-        [{attr, html_escape(value)} | acc]
+        [{attr, value |> escape_quotes |> html_escape} | acc]
     end
   end
 
@@ -218,6 +218,11 @@ defmodule StripJs do
     |> String.replace("&", "&amp;")
     |> String.replace("<", "&lt;")
     |> String.replace(">", "&gt;")
+  end
+
+  defp escape_quotes(html) do
+    html
+    |> String.replace("\"", "&quot;")
   end
 
 
