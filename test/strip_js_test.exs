@@ -82,7 +82,7 @@ defmodule StripJsTest do
       assert("<tt>&lt;</tt>" == StripJs.clean_html("<tt>&lt;</tt>"))
       assert("<tt attr=\"&lt;\">&lt;</tt>" == StripJs.clean_html("<tt attr='<'><</tt>"))
       assert("<tt attr=\"&lt;\">&lt;</tt>" == StripJs.clean_html("<tt attr='&lt;'>&lt;</tt>"))
-      assert("&lt;script&gt; alert('pwnt'); &lt;/script&gt;" == StripJs.clean_html("&lt;script&gt; alert('pwnt'); &lt;/script&gt;"))
+      assert("&lt;script&gt; alert(&apos;pwnt&apos;); &lt;/script&gt;" == StripJs.clean_html("&lt;script&gt; alert('pwnt'); &lt;/script&gt;"))
     end
   end
 
