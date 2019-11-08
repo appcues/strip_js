@@ -1,7 +1,15 @@
-%{"dialyxir": {:hex, :dialyxir, "0.5.1", "b331b091720fd93e878137add264bac4f644e1ddae07a70bf7062c7862c4b952", [:mix], []},
+%{
+  "dialyxir": {:hex, :dialyxir, "0.5.1", "b331b091720fd93e878137add264bac4f644e1ddae07a70bf7062c7862c4b952", [:mix], []},
   "earmark": {:hex, :earmark, "1.2.3", "206eb2e2ac1a794aa5256f3982de7a76bf4579ff91cb28d0e17ea2c9491e46a4", [:mix], []},
   "ex_doc": {:hex, :ex_doc, "0.16.2", "3b3e210ebcd85a7c76b4e73f85c5640c011d2a0b2f06dcdf5acdb2ae904e5084", [:mix], [{:earmark, "~> 1.1", [hex: :earmark, optional: false]}]},
   "ex_spec": {:hex, :ex_spec, "2.0.1", "8bdbd6fa85995fbf836ed799571d44be6f9ebbcace075209fd0ad06372c111cf", [:mix], []},
-  "floki": {:hex, :floki, "0.17.2", "81b3a39d85f5cae39c8da16236ce152f7f8f50faf84b480ba53351d7e96ca6ca", [:mix], [{:mochiweb, "~> 2.15", [hex: :mochiweb, optional: false]}]},
-  "html_entities": {:hex, :html_entities, "0.3.0", "2f278ffc69c3f0cbd5996628fef37cf922fa715f3e04b9f38924c8adced3f25a", [], [], "hexpm"},
-  "mochiweb": {:hex, :mochiweb, "2.15.0", "e1daac474df07651e5d17cc1e642c4069c7850dc4508d3db7263a0651330aacc", [:rebar3], []}}
+  "floki": {:hex, :floki, "0.23.0", "956ab6dba828c96e732454809fb0bd8d43ce0979b75f34de6322e73d4c917829", [:mix], [{:html_entities, "~> 0.4.0", [hex: :html_entities, repo: "hexpm", optional: false]}], "hexpm"},
+  "freedom_formatter": {:hex, :freedom_formatter, "1.1.1", "de6902f524a9bf32e83159baa35666f1e4d4834ad6f81e467da227fd13785656", [:mix], [], "hexpm"},
+  "html5ever": {:hex, :html5ever, "0.7.0", "9f63ec1c783b2dc9f326840fcc993c01e926dbdef4e51ba1bbe5355993c258b4", [:mix], [{:rustler, "~> 0.18.0", [hex: :rustler, repo: "hexpm", optional: false]}], "hexpm"},
+  "html_entities": {:hex, :html_entities, "0.4.0", "f2fee876858cf6aaa9db608820a3209e45a087c5177332799592142b50e89a6b", [:mix], [], "hexpm"},
+  "meeseeks": {:hex, :meeseeks, "0.14.0", "c88bdabcfaf7c2158468c19fe3053f9f4f32222970bf1007a54415f9390ef7e6", [:mix], [{:meeseeks_html5ever, "~> 0.12.1", [hex: :meeseeks_html5ever, repo: "hexpm", optional: false]}], "hexpm"},
+  "meeseeks_html5ever": {:hex, :meeseeks_html5ever, "0.12.1", "718fab10d05b83204524a518b2b88caa37ba6a6e02f82e80d6a7bc47552fb54a", [:mix], [{:rustler, "~> 0.21.0", [hex: :rustler, repo: "hexpm", optional: false]}], "hexpm"},
+  "mochiweb": {:hex, :mochiweb, "2.15.0", "e1daac474df07651e5d17cc1e642c4069c7850dc4508d3db7263a0651330aacc", [:rebar3], []},
+  "rustler": {:hex, :rustler, "0.18.0", "db4bd0c613d83a1badc31be90ddada6f9821de29e4afd15c53a5da61882e4f2d", [:mix], [], "hexpm"},
+  "toml": {:hex, :toml, "0.5.2", "e471388a8726d1ce51a6b32f864b8228a1eb8edc907a0edf2bb50eab9321b526", [:mix], [], "hexpm"},
+}

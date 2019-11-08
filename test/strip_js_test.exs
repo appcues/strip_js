@@ -40,15 +40,33 @@ defmodule StripJsTest do
   </html>
   """
 
+  @html_with_svg """
+  <html>
+  <head>
+    <title>garbage</title>
+  </head>
+  <body>
+    <!--omg comment-->
+    <a href="http://example.com">Click me</a>
+    <div>
+      <a href="#">Click me too</a>
+    </div>
+    <p>Hi, mom!</p>
+    <svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 400 200"></svg>
+  </body>
+  </html>
+  """
+
   context "test cases" do
     it "passes test cases" do
-      Enum.each TestCases.test_cases, fn ({input, out}) ->
-        real_output_tree = input |> StripJs.clean_html
+      Enum.each(TestCases.test_cases(), fn {input, out} ->
+        real_output_tree = input |> StripJs.clean_html()
         expected_output_tree = out
         assert(expected_output_tree == real_output_tree)
-      end
+      end)
     end
   end
+
   context "strip_js" do
     it "strips js from html" do
       stripped_html = Floki.parse(StripJs.clean_html(@html_with_js))
@@ -70,8 +88,19 @@ defmodule StripJsTest do
       assert("<tt>1</tt>lol" == StripJs.clean_html("<tt>1</tt>lol"))
       assert("asdf<tt>1</tt>lol" == StripJs.clean_html("asdf<tt>1</tt>lol"))
       assert("asdf <tt> 1</tt> lol" == StripJs.clean_html("asdf <tt> 1</tt> lol"))
-      assert("asdf <tt> 1</tt> lol" == StripJs.clean_html("asdf <tt> 1<script src='bad.js'></script></tt> lol"))
-      assert("asdf <tt> 1</tt> lol" == StripJs.clean_html("asdf <tt onclick=\"alert('hah');\"> 1<script src='bad.js'></script></tt> lol"))
+
+      assert(
+        "asdf <tt> 1</tt> lol" ==
+          StripJs.clean_html("asdf <tt> 1<script src='bad.js'></script></tt> lol")
+      )
+
+      assert(
+        "asdf <tt> 1</tt> lol" ==
+          StripJs.clean_html(
+            "asdf <tt onclick=\"alert('hah');\"> 1<script src='bad.js'></script></tt> lol"
+          )
+      )
+
       assert(" asdf   omg " == StripJs.clean_html(" asdf <script>alert('LOL');</script>  omg "))
     end
 
@@ -82,9 +111,16 @@ defmodule StripJsTest do
       assert("<tt>&lt;</tt>" == StripJs.clean_html("<tt>&lt;</tt>"))
       assert("<tt attr=\"&lt;\">&lt;</tt>" == StripJs.clean_html("<tt attr='<'><</tt>"))
       assert("<tt attr=\"&lt;\">&lt;</tt>" == StripJs.clean_html("<tt attr='&lt;'>&lt;</tt>"))
-      assert("&lt;script&gt; alert('pwnt'); &lt;/script&gt;" == StripJs.clean_html("&lt;script&gt; alert('pwnt'); &lt;/script&gt;"))
+
+      assert(
+        "&lt;script&gt; alert('pwnt'); &lt;/script&gt;" ==
+          StripJs.clean_html("&lt;script&gt; alert('pwnt'); &lt;/script&gt;")
+      )
+    end
+
+    it "preserves camel-cased SVG attributes" do
+      stripped_html = Floki.parse(@html_with_svg)
+      assert @html_with_svg == StripJs.clean_html(@html_with_svg)
     end
   end
-
 end
-
