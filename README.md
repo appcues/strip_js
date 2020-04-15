@@ -1,5 +1,9 @@
 # StripJs
 
+[![appcues](https://circleci.com/gh/appcues/strip_js.svg?style=svg)](https://circleci.com/gh/appcues/strip_js)
+[![StripJs version](https://img.shields.io/hexpm/v/strip_js.svg)](https://hex.pm/packages/strip_js)
+[![Hex.pm](https://img.shields.io/hexpm/dt/strip_js.svg)](https://hex.pm/packages/strip_js)
+
 StripJs is an Elixir module for stripping executable JavaScript from
 blocks of HTML and CSS.
 
@@ -35,7 +39,7 @@ Hexdocs.pm.
 
 ## Authorship and License
 
-Copyright 2017, Appcues, Inc.
+Copyright 2020, Appcues, Inc.
 
 StripJs is released under the
 [MIT License](https://opensource.org/licenses/MIT).

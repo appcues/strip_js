@@ -4,40 +4,39 @@ defmodule StripJs.Mixfile do
   def project do
     [
       app: :strip_js,
-      version: "0.9.2",
+      version: "0.10.0",
       description: "Strip JavaScript from HTML and CSS",
       package: package(),
-      elixir: "~> 1.2",
-      build_embedded: Mix.env == :prod,
-      start_permanent: Mix.env == :prod,
+      elixir: "~> 1.10",
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: [
-        docs: "docs --source-url https://github.com/appcues/strip_js",
-      ],
-   ]
+        docs: "docs --source-url https://github.com/appcues/strip_js"
+      ]
+    ]
   end
 
   def package do
     [
       licenses: ["MIT"],
       maintainers: ["pete gamache <pete@appcues.com>"],
-      links: %{github: "https://github.com/appcues/strip_js"},
+      links: %{github: "https://github.com/appcues/strip_js"}
     ]
   end
 
   def application do
     [
-      applications: [:logger, :floki],
+      applications: [:logger, :floki]
     ]
   end
 
   defp deps do
     [
-      {:floki, "~> 0.17.2"},
+      {:floki, github: "appcues/floki", ref: "0bf9762"},
       {:ex_spec, "~> 2.0", only: :test},
       {:ex_doc, ">= 0.0.0", only: :dev},
-      {:dialyxir, ">= 0.0.0", only: :dev},
+      {:dialyxir, ">= 0.0.0", only: :dev}
     ]
   end
 end
-
