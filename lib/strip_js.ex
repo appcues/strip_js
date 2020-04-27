@@ -1,5 +1,5 @@
 defmodule StripJs do
-  @moduledoc ~s"""
+  @moduledoc ~S"""
   StripJs is an Elixir module for stripping executable JavaScript from
   blocks of HTML and CSS.
 
@@ -21,10 +21,8 @@ defmodule StripJs do
       end
 
       def deps do
-        [{:strip_js, "~> #{StripJs.Mixfile.project[:version]}"}]
+        [{:strip_js, "~> #{StripJs.Mixfile.project()[:version]}"}]
       end
-
-  """ <> ~S"""
 
   ## Usage
 
@@ -44,7 +42,7 @@ defmodule StripJs do
   HTML parser library, which is built using
   [Mochiweb](https://github.com/mochi/mochiweb).
   StripJs provides a `clean_html_tree/1` function to strip JS from
-  `Floki.parse/1`- and `:mochiweb_html.parse/1`- style HTML parse trees.
+  `Floki.parse_fragment/1`- and `:mochiweb_html.parse/1`- style HTML parse trees.
 
 
   ## Bugs and Limitations
@@ -61,7 +59,7 @@ defmodule StripJs do
 
   ## Authorship and License
 
-  Copyright 2017, Appcues, Inc.
+  Copyright 2020, Appcues, Inc.
 
   Project homepage:
   [StripJs](https://github.com/appcues/strip_js)
@@ -71,16 +69,16 @@ defmodule StripJs do
   """
   require Logger
 
-  @type opts :: Keyword.t  # reserved for future use
+  # reserved for future use
+  @type opts :: Keyword.t()
 
-  @type html_tag :: String.t
+  @type html_tag :: String.t()
 
-  @type html_attr :: {String.t, String.t}
+  @type html_attr :: {String.t(), String.t()}
 
-  @type html_node :: String.t | {html_tag, [html_attr], [html_node]}
+  @type html_node :: String.t() | {html_tag, [html_attr], [html_node]}
 
   @type html_tree :: html_node | [html_node]
-
 
   @doc ~S"""
   Removes JS vectors from the given HTML string.
@@ -102,7 +100,7 @@ defmodule StripJs do
       iex> StripJs.clean_html("&lt;script&gt; console.log('oh heck'); &lt;/script&gt;")
       "&lt;script&gt; console.log('oh heck'); &lt;/script&gt;"  ## HTML entity attack didn't work
   """
-  @spec clean_html(String.t, opts) :: String.t
+  @spec clean_html(String.t(), opts) :: String.t()
   def clean_html(html, opts \\ []) when is_binary(html) do
     html
     |> parse_html(opts)
@@ -115,7 +113,6 @@ defmodule StripJs do
     IO.warn("StripJs.strip_js is deprecated; use StripJs.clean_html instead")
     clean_html(html, opts)
   end
-
 
   @doc ~S"""
   Removes JS vectors from the given
@@ -130,7 +127,7 @@ defmodule StripJs do
   def clean_html_tree(trees, opts \\ [])
 
   def clean_html_tree(trees, opts) when is_list(trees) do
-    Enum.map(trees, &(clean_html_tree(&1, opts)))
+    Enum.map(trees, &clean_html_tree(&1, opts))
   end
 
   def clean_html_tree({:comment, comment}, _opts) do
@@ -140,12 +137,17 @@ defmodule StripJs do
   def clean_html_tree({tag, attrs, children}, _opts) do
     case String.downcase(tag) do
       "script" ->
-        ""  # remove scripts entirely
+        # remove scripts entirely
+        ""
+
       "style" ->
-        cleaned_css = children |> to_html |> clean_css  # don't HTML-escape!
+        # don't HTML-escape!
+        cleaned_css = children |> to_html |> clean_css
         {tag, clean_attrs(attrs), [cleaned_css]}
+
       _ ->
-        cleaned_children = Enum.map(children, &(clean_html_tree(&1)))
+        cleaned_children = Enum.map(children, &clean_html_tree(&1))
+
         {tag, clean_attrs(attrs), cleaned_children}
     end
   end
@@ -157,10 +159,12 @@ defmodule StripJs do
   @doc false
   @spec strip_js_from_tree(html_tree, opts) :: html_tree
   def strip_js_from_tree(tree, opts \\ []) do
-    IO.warn("StripJs.strip_js_from_tree is deprecated; use StripJs.clean_html_tree instead")
+    IO.warn(
+      "StripJs.strip_js_from_tree is deprecated; use StripJs.clean_html_tree instead"
+    )
+
     clean_html_tree(tree, opts)
   end
-
 
   @doc ~S"""
   Removes JS vectors from the given CSS string; i.e., the contents of a
@@ -179,40 +183,46 @@ defmodule StripJs do
   possible for innocent CSS containing either of the strings `javascript:`
   or `expression(` to be mangled.
   """
-  @spec clean_css(String.t, opts) :: String.t
+  @spec clean_css(String.t(), opts) :: String.t()
   def clean_css(css, _opts \\ []) when is_binary(css) do
     css
     |> String.replace(~r/javascript \s* :/xi, "removed_by_strip_js:")
     |> String.replace(~r/expression \s* \(/xi, "removed_by_strip_js(")
   end
 
-
   ## Removes JS vectors from the given HTML attributes.
-  @spec clean_attrs([{String.t, String.t}]) :: [{String.t, String.t}]
+  @spec clean_attrs([{String.t(), String.t()}]) :: [{String.t(), String.t()}]
   defp clean_attrs(attrs) do
     attrs
     |> Enum.reduce([], &clean_attr/2)
-    |> Enum.reverse
+    |> Enum.reverse()
   end
 
   @attrs_with_urls ["href", "src", "background", "dynsrc", "lowsrc"]
 
-  @spec clean_attr({String.t, String.t}, [{String.t, String.t}]) :: [{String.t, String.t}]
+  @spec clean_attr({String.t(), String.t()}, [{String.t(), String.t()}]) :: [
+          {String.t(), String.t()}
+        ]
   defp clean_attr({attr, value}, acc) do
     attr = String.downcase(attr)
+
     cond do
-      (attr in @attrs_with_urls) && String.match?(value, ~r/^ \s* javascript \s* :/xi) ->
-        [{attr, "#"} | acc]  # retain the attribute so we emit valid HTML
+      attr in @attrs_with_urls &&
+          String.match?(value, ~r/^ \s* javascript \s* :/xi) ->
+        # retain the attribute so we emit valid HTML
+        [{attr, "#"} | acc]
+
       String.starts_with?(attr, "on") ->
-        acc  # remove on* handlers entirely
+        # remove on* handlers entirely
+        acc
+
       :else ->
-        [{attr, value |> escape_quotes |> html_escape} | acc]
+        [{attr, value} | acc]
     end
   end
 
-
   ## Performs good-enough HTML escaping to prevent HTML entity attacks.
-  @spec html_escape(String.t) :: String.t
+  @spec html_escape(String.t()) :: String.t()
   defp html_escape(html) do
     html
     |> String.replace("&", "&amp;")
@@ -220,20 +230,12 @@ defmodule StripJs do
     |> String.replace(">", "&gt;")
   end
 
-  defp escape_quotes(html) do
-    html
-    |> String.replace("\"", "&quot;")
-  end
-
-
   ## Parses the given HTML into an `t:html_tree/0` structure.
-  @spec parse_html(String.t, opts) :: html_tree
-  defp parse_html(html, _opts), do: Floki.parse(html)
-
+  @spec parse_html(String.t(), opts) :: html_tree
+  defp parse_html(html, _opts), do: Floki.parse_fragment!(html)
 
   ## Converts HTML tree to string.
-  @spec to_html(html_tree) :: String.t
+  @spec to_html(html_tree) :: String.t()
   defp to_html(tree) when is_binary(tree), do: tree
-  defp to_html(tree), do: tree |> Floki.raw_html
+  defp to_html(tree), do: tree |> Floki.raw_html(encode: false)
 end
-
