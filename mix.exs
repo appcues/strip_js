@@ -33,7 +33,7 @@ defmodule StripJs.Mixfile do
 
   defp deps do
     [
-      {:floki, github: "appcues/floki", ref: "0bf9762"},
+      {:floki, github: "philss/floki", ref: "af5dcdb"},
       {:ex_spec, "~> 2.0", only: :test},
       {:ex_doc, ">= 0.0.0", only: :dev},
       {:dialyxir, ">= 0.0.0", only: :dev}
