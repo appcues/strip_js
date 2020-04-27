@@ -230,11 +230,6 @@ defmodule StripJs do
     |> String.replace(">", "&gt;")
   end
 
-  defp escape_quotes(html) do
-    html
-    |> String.replace("\"", "&quot;")
-  end
-
   ## Parses the given HTML into an `t:html_tree/0` structure.
   @spec parse_html(String.t(), opts) :: html_tree
   defp parse_html(html, _opts), do: Floki.parse_fragment!(html)
