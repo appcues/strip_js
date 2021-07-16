@@ -38,5 +38,5 @@ jobs:
 
       - store_test_results:
           # Read more: https://circleci.com/docs/2.0/collect-test-data/
-          path: _build/test/lib/customer_api # Replace with the name of your :app
+          path: _build/test/lib/strip_js # Replace with the name of your :app
 
