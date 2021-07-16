@@ -35,8 +35,8 @@ defmodule StripJs.Mixfile do
     [
       {:floki, github: "philss/floki", ref: "af5dcdb"},
       {:ex_spec, "~> 2.0", only: :test},
-      {:ex_doc, ">= 0.0.0", only: :dev},
-      {:dialyxir, ">= 0.0.0", only: :dev}
+      {:ex_doc, ">= 0.24.2", only: :dev},
+      {:dialyxir, ">= 1.1.0", only: :dev}
     ]
   end
 end
