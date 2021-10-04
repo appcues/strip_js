@@ -5,7 +5,8 @@
 [![Hex.pm](https://img.shields.io/hexpm/dt/strip_js.svg)](https://hex.pm/packages/strip_js)
 
 StripJs is an Elixir module for stripping executable JavaScript from
-blocks of HTML and CSS.
+blocks of HTML and CSS, based on the <a target=_blank
+href="https://github.com/philss/floki">Floki</a> parsing library.
 
 It handles:
 
@@ -15,6 +16,8 @@ It handles:
 * CSS `expression(...)` directives
 * HTML entity attacks (like `&lt;script&gt;`)
 
+StripJs is production ready, and has sanitized over 1.5 billion payloads
+at Appcues.
 
 ## Usage
 
@@ -30,16 +33,23 @@ It handles:
     iex> StripJs.clean_css(css)
     "body { background-image: url('removed_by_strip_js:alert()'); }"
 
+## Security
+
+StripJs blocks every JS injection vector known to the authors. It has
+survived four years in production, multiple professional penetration
+tests, and over a billion invocations with no known security issues.
+
+If you believe there are JS injection methods not covered by this library,
+please submit an issue with a test case!
 
 ## [Documentation](https://hexdocs.pm/strip_js/StripJs.html)
 
 [Full docs](https://hexdocs.pm/strip_js/StripJs.html) are available at
 Hexdocs.pm.
 
-
 ## Authorship and License
 
-Copyright 2020, Appcues, Inc.
+Copyright 2017-2021, Appcues, Inc.
 
 StripJs is released under the
 [MIT License](https://opensource.org/licenses/MIT).

@@ -1,7 +1,8 @@
 defmodule StripJs do
   @moduledoc ~S"""
   StripJs is an Elixir module for stripping executable JavaScript from
-  blocks of HTML and CSS.
+  blocks of HTML and CSS, based on the <a target=_blank
+  href="https://github.com/philss/floki">Floki</a> parsing library.
 
   It handles:
 
@@ -11,6 +12,8 @@ defmodule StripJs do
   * CSS `expression(...)` directives
   * HTML entity attacks (like `&lt;script&gt;`)
 
+  StripJs is production ready, and has sanitized over 1.5 billion payloads
+  at Appcues.
 
   ## Installation
 
@@ -40,10 +43,18 @@ defmodule StripJs do
 
   StripJs relies on the [Floki](https://github.com/philss/floki)
   HTML parser library, which is built using
-  [Mochiweb](https://github.com/mochi/mochiweb).
+  [Mochiweb](https://github.com/mochi/mochiweb) by default.
   StripJs provides a `clean_html_tree/1` function to strip JS from
   `Floki.parse_fragment/1`- and `:mochiweb_html.parse/1`- style HTML parse trees.
 
+  ## Security
+
+  StripJs blocks every JS injection vector known to the authors. It has
+  survived four years in production, multiple professional penetration
+  tests, and over a billion invocations with no known security issues.
+
+  If you believe there are JS injection methods not covered by this library,
+  please submit an issue with a test case!
 
   ## Bugs and Limitations
 
@@ -52,14 +63,9 @@ defmodule StripJs do
   In uncommon cases, innocent CSS which very closely resembles
   JS-injection techniques may be mangled by `clean_css/2`.
 
-  StripJs may not block 100% of executable JavaScript, though it gets
-  quite close.  If you believe there are JS injection methods not
-  covered by this library, please submit an issue with a test case!
-
-
   ## Authorship and License
 
-  Copyright 2020, Appcues, Inc.
+  Copyright 2017-2021, Appcues, Inc.
 
   Project homepage:
   [StripJs](https://github.com/appcues/strip_js)
