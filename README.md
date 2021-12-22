@@ -51,6 +51,5 @@ Hexdocs.pm.
 
 Copyright 2017-2021, Appcues, Inc.
 
-StripJs is released under the
-[MIT License](https://opensource.org/licenses/MIT).
+StripJs is released under the [MIT License](./LICENSE.md).
 
