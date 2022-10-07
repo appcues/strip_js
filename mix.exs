@@ -4,7 +4,7 @@ defmodule StripJs.Mixfile do
   def project do
     [
       app: :strip_js,
-      version: "1.1.2",
+      version: "1.1.3",
       description: "Strip JavaScript from HTML and CSS",
       package: package(),
       elixir: "~> 1.10",
@@ -33,7 +33,7 @@ defmodule StripJs.Mixfile do
 
   defp deps do
     [
-      {:floki, "~> 0.32.0"},
+      {:floki, "~> 0.33.0"},
       {:ex_spec, "~> 2.0", only: :test},
       {:ex_doc, ">= 0.26.0", only: :dev},
       {:dialyxir, ">= 1.1.0", only: :dev}
