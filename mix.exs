@@ -4,7 +4,7 @@ defmodule StripJs.Mixfile do
   def project do
     [
       app: :strip_js,
-      version: "1.1.2",
+      version: "1.1.3",
       description: "Strip JavaScript from HTML and CSS",
       package: package(),
       elixir: "~> 1.10",
