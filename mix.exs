@@ -33,7 +33,7 @@ defmodule StripJs.Mixfile do
 
   defp deps do
     [
-      {:floki, path: "~/src/floki"},
+      {:floki, "~> 0.37.0"},
       {:ex_spec, "~> 2.0", only: :test},
       {:ex_doc, ">= 0.26.0", only: :dev},
       {:dialyxir, ">= 1.1.0", only: :dev}
