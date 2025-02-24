@@ -104,7 +104,7 @@ defmodule StripJs do
       ""
 
       iex> StripJs.clean_html("&lt;script&gt; console.log('oh heck'); &lt;/script&gt;")
-      "&lt;script&gt; console.log('oh heck'); &lt;/script&gt;"  ## HTML entity attack didn't work
+      "&lt;script&gt; console.log(&#39;oh heck&#39;); &lt;/script&gt;"  ## HTML entity attack didn't work
   """
   @spec clean_html(String.t(), opts) :: String.t()
   def clean_html(html, opts \\ []) when is_binary(html) do
@@ -148,8 +148,8 @@ defmodule StripJs do
 
       "style" ->
         # don't HTML-escape!
-        cleaned_css = children |> to_html |> clean_css
-        {tag, clean_attrs(attrs), [cleaned_css]}
+        cleaned_css = children |> Enum.map(&clean_css/1)
+        {tag, clean_attrs(attrs), cleaned_css}
 
       _ ->
         cleaned_children = Enum.map(children, &clean_html_tree(&1))
@@ -227,13 +227,9 @@ defmodule StripJs do
     end
   end
 
-  ## Performs good-enough HTML escaping to prevent HTML entity attacks.
-  @spec html_escape(String.t()) :: String.t()
+  ## We used to do this but now Floki does it
   defp html_escape(html) do
     html
-    |> String.replace("&", "&amp;")
-    |> String.replace("<", "&lt;")
-    |> String.replace(">", "&gt;")
   end
 
   ## Parses the given HTML into an `t:html_tree/0` structure.
@@ -243,5 +239,5 @@ defmodule StripJs do
   ## Converts HTML tree to string.
   @spec to_html(html_tree) :: String.t()
   defp to_html(tree) when is_binary(tree), do: tree
-  defp to_html(tree), do: tree |> Floki.raw_html(encode: false)
+  defp to_html(tree), do: tree |> Floki.raw_html()
 end

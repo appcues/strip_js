@@ -43,7 +43,7 @@ defmodule StripJsTest do
   context "test cases" do
     it "passes test cases" do
       Enum.each(TestCases.test_cases(), fn {input, out} ->
-        real_output_tree = input |> StripJs.clean_html()
+        real_output_tree = StripJs.clean_html(input)
         expected_output_tree = out
         assert(expected_output_tree == real_output_tree)
       end)
@@ -106,23 +106,21 @@ defmodule StripJsTest do
       assert("<tt>&lt;</tt>" == StripJs.clean_html("<tt>&lt;</tt>"))
 
       assert(
-        "<tt attr=\"<\">&lt;</tt>" ==
+        "<tt attr=\"&lt;\">&lt;</tt>" ==
           StripJs.clean_html("<tt attr='<'><</tt>")
       )
 
       assert(
-        "<tt attr=\"<\">&lt;</tt>" ==
+        "<tt attr=\"&lt;\">&lt;</tt>" ==
           StripJs.clean_html("<tt attr='&lt;'>&lt;</tt>")
       )
 
       assert(
-        "&lt;script&gt; alert('pwnt'); &lt;/script&gt;" ==
+        "&lt;script&gt; alert(&#39;pwnt&#39;); &lt;/script&gt;" ==
           StripJs.clean_html("&lt;script&gt; alert('pwnt'); &lt;/script&gt;")
       )
     end
 
-    # This is actually wrong and according to the spec, in an attribute, those entities
-    # would be interpreted as their literal value. See also https://stackoverflow.com/questions/12444605/is-it-okay-to-use-html-entities-in-attributes
     @premangled_html """
     <a data-attrs-event="{&quot;event&quot;:&quot;Primary use case set&quot;}">test</a>
     """
@@ -132,7 +130,9 @@ defmodule StripJsTest do
 
       assert(
         stripped_html
-        |> String.contains?("{\"event\":\"Primary use case set\"}")
+        |> String.contains?(
+          "{&quot;event&quot;:&quot;Primary use case set&quot;}"
+        )
       )
     end
   end
