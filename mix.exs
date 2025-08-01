@@ -27,7 +27,7 @@ defmodule StripJs.Mixfile do
 
   def application do
     [
-      applications: [:logger, :floki]
+      extra_applications: [:logger, :floki]
     ]
   end
 

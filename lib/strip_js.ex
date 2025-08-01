@@ -189,7 +189,7 @@ defmodule StripJs do
   possible for innocent CSS containing either of the strings `javascript:`
   or `expression(` to be mangled.
   """
-  @spec clean_css(String.t()) :: String.t()
+  @spec clean_css(String.t() | any()) :: String.t() | any()
   def clean_css(css)
 
   def clean_css(css) when is_binary(css) do
