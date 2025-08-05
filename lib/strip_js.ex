@@ -189,11 +189,17 @@ defmodule StripJs do
   possible for innocent CSS containing either of the strings `javascript:`
   or `expression(` to be mangled.
   """
-  @spec clean_css(String.t(), opts) :: String.t()
-  def clean_css(css, _opts \\ []) when is_binary(css) do
+  @spec clean_css(String.t() | any()) :: String.t() | any()
+  def clean_css(css)
+
+  def clean_css(css) when is_binary(css) do
     css
     |> String.replace(~r/javascript \s* :/xi, "removed_by_strip_js:")
     |> String.replace(~r/expression \s* \(/xi, "removed_by_strip_js(")
+  end
+
+  def clean_css(css) do
+    css
   end
 
   ## Removes JS vectors from the given HTML attributes.
