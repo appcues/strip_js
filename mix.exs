@@ -7,7 +7,7 @@ defmodule StripJs.Mixfile do
       version: "1.4.5",
       description: "Strip JavaScript from HTML and CSS",
       package: package(),
-      elixir: "~> 1.10",
+      elixir: "~> 1.15",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
